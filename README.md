@@ -1,130 +1,253 @@
-# 📊 Streaming Market Regime Detection using Statistical Time-Series Analysis
+# Unsupervised Market Regime Segmentation Engine
 
 ## Overview
 
-This project implements a **streaming-style market regime detection system** for financial time-series data using rolling statistical methods.
+Financial markets continuously transition between different behavioral states. Periods of low volatility, high volatility, strong trends, market crashes, and recoveries often exhibit distinct statistical characteristics. Identifying these changes can provide valuable insight into underlying market dynamics.
 
-The objective is to identify structural changes in market behavior by analyzing shifts in return distributions over time, while ensuring a strictly forward-only (no look-ahead) processing pipeline.
+This project explores an unsupervised approach for detecting market regime transitions using rolling statistical analysis of financial time series. The framework segments historical market data into statistically similar regions without relying on labeled training data or predefined regime classifications.
 
-This makes the system suitable for simulating real-time risk monitoring or sequential analysis environments.
-
----
-
-## Data Source
-
-Market data is obtained using the `yfinance` Python library, which provides historical financial data from Yahoo Finance.
-
-- Source: Yahoo Finance via `yfinance`
-- Data type: Daily adjusted closing prices
-- Assets: Equity time-series (configurable)
-- Feature engineering: Log returns computed from price series
-
-This project is intended for research and educational purposes only.
+The primary objective was to investigate whether simple statistical properties of streaming market returns could be used to identify structural changes in market behavior while maintaining an interpretable and computationally lightweight architecture.
 
 ---
 
-## Motivation
+## Objectives
 
-Financial time-series data is inherently:
-- Non-stationary
-- Noisy
-- Regime-dependent
+The project was designed to:
 
-Traditional approaches such as global clustering or offline probabilistic models (e.g., full-sequence Hidden Markov Models) often assume access to the complete dataset, which can introduce look-ahead bias and limit real-time applicability.
-
-This project explores a lightweight alternative using **sequential statistical monitoring**.
+- Detect changes in market behavior using only historical price data.
+- Identify volatility-driven regime transitions.
+- Segment financial time series into statistically coherent regions.
+- Develop a streaming framework capable of adaptive boundary detection.
+- Visualize market regimes through volatility-aware overlays.
+- Explore unsupervised techniques commonly encountered in quantitative finance research.
 
 ---
 
 ## Methodology
 
-### 1. Streaming Processing
-- Data is processed in strict chronological order
-- No future information is used at any stage
+### Data Collection
 
-### 2. Log Return Transformation
-Market prices are converted into returns using:
+Historical market data is obtained using Yahoo Finance through the `yfinance` library.
 
-log(Pₜ / Pₜ₋₁)
+### Return Transformation
 
-This stabilizes variance and makes statistical properties more consistent.
+Daily closing prices are transformed into logarithmic returns:
 
----
+\[
+r_t = \ln\left(\frac{P_t}{P_{t-1}}\right)
+\]
 
-### 3. Rolling Window Statistics
-For each local window:
-- Mean
-- Standard deviation
-- Deviation from reference regime statistics
+Log returns are widely used in quantitative finance due to their additive properties and suitability for statistical analysis.
 
----
+### Initial Regime Seeding
 
-### 4. Regime Representation
-Each regime is characterized by:
+The algorithm begins by constructing an initial anchor regime using a fixed number of observations.
+
+For the initial regime, the following statistics are computed:
+
 - Mean return
-- Volatility (standard deviation)
-- Temporal stability across observations
+- Standard deviation (volatility)
+
+These values serve as the baseline profile for subsequent comparisons.
+
+### Streaming Window Generation
+
+New observations are continuously collected into a rolling analysis window.
+
+The rolling window allows the algorithm to evaluate whether incoming market behavior remains statistically consistent with the active regime.
+
+### Similarity Analysis
+
+Incoming observations are compared against the active regime profile using a normalized statistical similarity signal.
+
+The signal incorporates:
+
+- Difference in mean returns
+- Difference in volatility
+- Standard error normalization
+
+The resulting score provides a measure of similarity between the current regime and the incoming observations.
+
+### Boundary Refinement
+
+A progressive trimming process is applied to the rolling window.
+
+The algorithm searches for a boundary location where the remaining observations regain similarity with the active regime.
+
+This allows regime boundaries to emerge dynamically instead of relying on fixed segmentation intervals.
+
+### Regime Creation
+
+Depending on the similarity score:
+
+- Similar observations are absorbed into the current regime.
+- Dissimilar observations initialize a new regime.
+
+This process enables fully unsupervised segmentation of the time series.
 
 ---
 
-### 5. Transition Logic
-A regime change is detected when:
-- The deviation from the current regime exceeds a threshold
-- The deviation persists across consecutive observations (to reduce noise sensitivity)
+## Visualization
+
+Detected regimes are visualized using cumulative log returns.
+
+Background shading is used to represent regime volatility:
+
+- Lighter regions indicate relatively stable periods.
+- Darker regions indicate higher volatility environments.
+- Vertical boundaries represent detected regime transitions.
+
+This provides an intuitive view of how market behavior evolves over time.
 
 ---
 
-## Key Features
+## Results
 
-- Forward-only streaming design (no look-ahead bias)
-- Rolling statistical feature extraction
-- Noise-resistant regime segmentation logic
-- Lightweight numerical implementation using NumPy
-- Accelerated computation using Numba (where applicable)
+The framework was evaluated across multiple large-cap equities using identical segmentation logic and parameter settings.
+
+The generated outputs demonstrate:
+
+- Identification of major volatility events.
+- Segmentation of stable and unstable market periods.
+- Adaptive regime lengths without manual labeling.
+- Consistent behavior across different financial instruments.
+
+### Example Output 1
+
+![Ticker 1](images/ticker_1.png)
+
+### Example Output 2
+
+![Ticker 2](images/ticker_2.png)
+
+### Example Output 3
+
+![Ticker 3](images/ticker_3.png)
+
+### Example Output 4
+
+![Ticker 4](images/ticker_4.png)
 
 ---
 
-## Tech Stack
+## Key Observations
+
+Several consistent patterns emerged during experimentation:
+
+- Volatility spikes frequently coincide with regime transitions.
+- Stable market periods tend to form longer homogeneous regimes.
+- Different assets generate distinct segmentation structures despite identical parameters.
+- The framework captures large-scale structural changes without requiring supervised labels.
+
+---
+
+## Repository Contents
+
+```text
+market-regime-segmentation-rolling-statistics/
+│
+├── market_regime_engine.ipynb
+│   Research notebook containing development,
+│   experimentation, and visualization workflows.
+│
+├── market_regime_engine.py
+│   Standalone implementation of the complete
+│   market regime segmentation pipeline.
+│
+├── README.md
+│   Project documentation and methodology.
+│
+├── requirements.txt
+│   Required Python dependencies.
+│
+└── images/
+    ├── ticker_1.png
+    ├── ticker_2.png
+    ├── ticker_3.png
+    └── ticker_4.png
+
+    Example outputs from multiple assets.
+```
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/AnkitMana/market-regime-segmentation-rolling-statistics.git
+cd market-regime-segmentation-rolling-statistics
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Usage
+
+Run the standalone implementation:
+
+```bash
+python market_regime_engine.py
+```
+
+Alternatively, explore the notebook version:
+
+```bash
+jupyter notebook market_regime_engine.ipynb
+```
+
+---
+
+## Technologies Used
 
 - Python
 - NumPy
 - Pandas
+- Matplotlib
+- Yahoo Finance (yfinance)
 - Numba
-- Matplotlib (for visualization)
-- yfinance (data acquisition)
-
----
-
-## Use Cases
-
-This system is applicable to:
-
-- Market regime segmentation
-- Volatility structure analysis
-- Risk regime monitoring
-- Time-series structural shift detection
-- Research in statistical signal processing
 
 ---
 
 ## Limitations
 
-- The model is based on heuristic statistical thresholds and does not learn regime boundaries directly from data.
-- No probabilistic framework (e.g., Hidden Markov Models) is currently implemented for comparison.
-- Sensitivity to threshold selection may affect segmentation stability across different datasets.
-- No formal backtesting or predictive validation has been performed yet.
-- The current implementation focuses on regime segmentation rather than forecasting.
+This project is intended as an exploratory statistical framework and has several limitations:
+
+- Regime boundaries are sensitive to window-size selection.
+- Similarity thresholds require manual tuning.
+- Only first-order return statistics are considered.
+- No external ground-truth labels are available for validation.
+- Market volume, macroeconomic factors, and market microstructure information are not incorporated.
 
 ---
 
 ## Future Work
 
-- Benchmarking against Hidden Markov Models
-- LSTM-based sequential modeling for regime prediction
-- Formal backtesting framework for financial validation
-- Multi-asset regime correlation analysis
-- Adaptive threshold learning methods
+Potential extensions include:
 
+- Hidden Markov Models (HMMs)
+- Bayesian Online Change Point Detection
+- Adaptive threshold selection
+- Multi-factor regime characterization
+- Volatility clustering models
+- Real-time streaming deployment
+- Regime-aware portfolio allocation
+- Risk management applications
+- Cross-asset regime analysis
+
+---
+
+## Conclusion
+
+This project demonstrates how simple statistical techniques can be used to construct an unsupervised market regime detection framework. While intentionally lightweight and interpretable, the methodology successfully identifies periods of changing market behavior and highlights the potential of statistical segmentation approaches for quantitative finance research.
+
+The work also served as an exploration of streaming data analysis, adaptive boundary detection, and financial time-series modeling, providing a foundation for future development of more sophisticated regime identification systems.
 ---
 
 ## Repository Structure
