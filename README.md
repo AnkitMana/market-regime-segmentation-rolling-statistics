@@ -114,19 +114,19 @@ The generated outputs demonstrate:
 
 ### Example Output 1
 
-![Ticker 1](images/ticker_1.png)
+![Ticker 1](images/ticker1.png)
 
 ### Example Output 2
 
-![Ticker 2](images/ticker_2.png)
+![Ticker 2](images/ticker2.png)
 
 ### Example Output 3
 
-![Ticker 3](images/ticker_3.png)
+![Ticker 3](images/ticker3.png)
 
 ### Example Output 4
 
-![Ticker 4](images/ticker_4.png)
+![Ticker 4](images/ticker4.png)
 
 ---
 
@@ -144,30 +144,38 @@ Several consistent patterns emerged during experimentation:
 ## Repository Contents
 
 ```text
+## Repository Contents
+
+```text
 market-regime-segmentation-rolling-statistics/
 │
-├── market_regime_engine.ipynb
-│   Research notebook containing development,
-│   experimentation, and visualization workflows.
+├── notebooks/
+│   │
+│   ├── Exploration_Regimes.ipynb
+│   │   Research notebook documenting the development
+│   │   process, statistical experimentation, signal
+│   │   design, parameter tuning, and regime analysis.
+│   │
+│   └── market_regime_engine.ipynb
+│       Consolidated implementation of the final
+│       market regime segmentation framework and
+│       visualization pipeline.
 │
-├── market_regime_engine.py
-│   Standalone implementation of the complete
-│   market regime segmentation pipeline.
+├── images/
+│   ├── ticker_1.png
+│   ├── ticker_2.png
+│   ├── ticker_3.png
+│   └── ticker_4.png
+│
+│   Example outputs generated using the final
+│   Market Regime Engine.
 │
 ├── README.md
-│   Project documentation and methodology.
+│   Project overview, methodology, results,
+│   limitations, and future work.
 │
-├── requirements.txt
-│   Required Python dependencies.
-│
-└── images/
-    ├── ticker_1.png
-    ├── ticker_2.png
-    ├── ticker_3.png
-    └── ticker_4.png
-
-    Example outputs from multiple assets.
-```
+└── requirements.txt
+    Python dependencies required to reproduce results.
 
 ---
 
